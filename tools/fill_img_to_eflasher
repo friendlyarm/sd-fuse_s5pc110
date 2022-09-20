@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "Error: not support eflasher"
+exit 1
