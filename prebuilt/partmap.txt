@@ -1,8 +1,0 @@
-# sd0 partition map
-# flash= <device>.<dev no>:<partition>:<fstype>:<start>,<length>
-#   support device : eeprom, nand, mmc
-#   support fstype : 2nd, boot, raw, fat, ext4, ubi
-#
-flash=mmc,0:boot0:raw:0x200,0x100000:u-boot-sd.bin;
-flash=mmc,0:FRIENDLYARM:fat:0x3200000,0x5CE00000:boot.img;
-flash=mmc,0:rootfs:ext4:0x60000000,0x100000000:rootfs.img;

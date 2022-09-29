@@ -1,73 +1,66 @@
 #!/bin/bash
-set -eu
+set -eux
 
 if [ $# -lt 2 ]; then
 	echo "Usage: $0 <rootfs dir> <img filename> "
     echo "example:"
-    echo "    tar xvzf NETDISK/S5PC110/rootfs/rootfs-friendlycore-20190603.tgz"
-    echo "    ./build-rootfs-img.sh friendlycore/rootfs friendlycore"
+    echo "    tar xvzf NETDISK/S5PC110/rootfs/rootfs_qtopia_qt4.tgz"
+    echo "    ./build-rootfs-img.sh rootfs_qtopia_qt4 friendlycore"
 	exit 0
 fi
+
+#----------------------------------------------------------
+# base setup
 
 ROOTFS_DIR=$1
 TARGET_OS=$2
 IMG_FILE=$TARGET_OS/rootfs.img
-if [ $# -eq 3 ]; then
-	IMG_SIZE=$3
-else
-	IMG_SIZE=0
-fi
+
+[ $# -eq 3 ] && IMG_SIZE=$3
+true ${IMG_SIZE:=536870912}
 
 TOP=$PWD
 true ${MKFS:="${TOP}/tools/make_ext4fs"}
 
-if [ ! -d ${ROOTFS_DIR} ]; then
-    echo "path '${ROOTFS_DIR}' not found."
-    exit 1
+if [ ! -d "${ROOTFS_DIR}" ]; then
+	echo "path '${ROOTFS_DIR}' not found."
+	exit 1
 fi
 
 # Automatically re-run script under sudo if not root
 if [ $(id -u) -ne 0 ]; then
-        echo "Re-running script under sudo..."
-        sudo "$0" "$@"
-        exit
+	echo "Re-running script under sudo..."
+	sudo "$0" "$@"
+	exit
 fi
 
-if [ ${IMG_SIZE} -eq 0 ]; then
-    # calc image size
-    ROOTFS_SIZE=`du -s -B 1 ${ROOTFS_DIR} | cut -f1`
-    # +256m
-    MAX_IMG_SIZE=$((${ROOTFS_SIZE} + 256*1024*1024))
+function clear_rootfs()
+{
+	(cd ${ROOTFS_DIR} && {
+		find ./dev ! -type d -exec rm {} \;
+		rm -f etc/pointercal
+		rm -f etc/fs.resized
+		rm -f etc/ts.detected
+		mkdir -p ./tmp
+		chmod 1777 ./tmp
+		if [ -d var/tmp ]; then
+			find var/tmp -type f -delete
+		fi
+		if [ -d var/log ]; then
+			find var/log -type f -delete
+		fi
+	})
+}
 
-    # echo " ROOTFS_SIZE: ${ROOTFS_SIZE}"
-    # echo "MAX_IMG_SIZE: ${MAX_IMG_SIZE}"
-
-    TMPFILE=`tempfile`
-    ${MKFS} -s -l ${MAX_IMG_SIZE} -a root -L rootfs /dev/null ${ROOTFS_DIR} > ${TMPFILE}
-    IMG_SIZE=`cat ${TMPFILE} | grep "Suggest size:" | cut -f2 -d ':' | awk '{gsub(/^\s+|\s+$/, "");print}'`
-    rm -f ${TMPFILE}
-
-    if [ ${ROOTFS_SIZE} -gt ${IMG_SIZE} ]; then
-            echo "IMG_SIZE less than ROOTFS_SIZE, why?"
-            exit 1
-    fi
-
-    # make fs
-    ${MKFS} -s -l ${IMG_SIZE} -a root -L rootfs ${IMG_FILE} ${ROOTFS_DIR}
-    if [ $? -ne 0 ]; then
-            echo "error: failed to  make rootfs.img."
-            exit 1
-     fi
-else
-    ${MKFS} -s -l ${IMG_SIZE} -a root -L rootfs ${IMG_FILE} ${ROOTFS_DIR}
-    if [ $? -ne 0 ]; then
-            echo "error: failed to  make rootfs.img."
-            exit 1
-     fi
+#----------------------------------------------------------
+# Make ext4 image
+clear_rootfs
+${MKFS} -s -l ${IMG_SIZE} -a root -L rootfs ${IMG_FILE} ${ROOTFS_DIR}
+if [ $? -ne 0 ]; then
+	echo "error: failed to  make rootfs.img."
+	exit 1
 fi
 
-# ${TOP}/tools/generate-partmap-txt.sh ${IMG_SIZE} ${TARGET_OS}
-[ -f ${TARGET_OS}/partmap.txt ] || cp prebuilt/partmap.txt ${TARGET_OS}/
 echo "generating ${IMG_FILE} done."
 echo 0
 

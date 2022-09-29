@@ -32,6 +32,7 @@ fi
 
 true ${SOC:=s5pc110}
 true ${TARGET_OS:=${1,,}}
+BOOT_DIR=${TARGET_OS}/boot
 
 case ${TARGET_OS} in
 friendlycore*)
@@ -128,8 +129,20 @@ true ${SD_FUSING:=$(dirname $0)/fusing.sh}
 ${SD_FUSING} ${LOOP_DEVICE} ${TARGET_OS}
 RET=$?
 
-if [ "x${TARGET_OS}" = "xeflasher" ]; then
-	mkfs.exfat ${LOOP_DEVICE}p1 -n FriendlyARM
+function copy_prebuilt_boot() {
+	local SRCDIR=$1
+	[ -d ${SRCDIR} ] || exit 1
+	local TMPDIR=`mktemp -d`
+
+	mount -t vfat ${LOOP_DEVICE}p1 ${TMPDIR}
+	cp -rfv --preserve=timestamps ${SRCDIR}/* ${TMPDIR}/
+	umount ${TMPDIR}
+	rm -rf ${TMPDIR}
+}
+
+if [ -n ${BOOT_DIR} ]; then
+	mkfs.vfat ${LOOP_DEVICE}p1 -n FriendlyARM
+	copy_prebuilt_boot ${BOOT_DIR}
 fi
 
 # cleanup

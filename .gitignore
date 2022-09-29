@@ -6,6 +6,8 @@
 # Normal rules
 #
 
+/rootfs_qtopia_qt4
+/rootfs_qtopia_qt4.tgz
 /test/out
 /test/tmp
 /out
