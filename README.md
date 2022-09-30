@@ -1,5 +1,5 @@
 # sd-fuse_s5pc110
-Create bootable SD card for TinyC110, used to install the system into onenand
+Create bootable SD card for TinyC110, used to flash OS images onto onenand, or boot directly from an SD card.
 
 ## Usage
 ### Re-pack SD image from binary files
@@ -10,6 +10,7 @@ wget http://112.124.9.243/dvdfiles/S5PC110/images/friendlycore-images.tgz
 tar xzf friendlycore-images.tgz
 sudo ./mk-sd-image.sh friendlycore
 ```
+You will get an image file named tinyc110-sdfuse_YYYYMMDD.img (located in the out directory), flash it to the SD card, use this SD card to boot tinyc110, it will automatically flash images to onenand.
 ### Make rootfs to img and then re-pack SD image
 ```
 git clone https://github.com/friendlyarm/sd-fuse_s5pc110.git
@@ -34,6 +35,7 @@ cp rootfs_qtopia_qt4.img ./friendlycore/boot/images/Linux/rootfs_qtopia_qt4.img 
 # re-pack sd img
 sudo ./mk-sd-image.sh friendlycore
 ```
+You will get an image file named tinyc110-sdfuse_YYYYMMDD.img (located in the out directory), flash it to the SD card, use this SD card to boot tinyc110, it will automatically flash the new images to onenand.
 ### Build kernel and uboot and then re-pack SD image
 ```
 git clone https://github.com/friendlyarm/sd-fuse_s5pc110.git
@@ -47,6 +49,7 @@ tar xzf friendlycore-images.tgz
 # re-pack sd img
 sudo ./mk-sd-image.sh friendlycore
 ```
+build-kernel.sh and build-uboot.sh will clone the source code from github.
 ### Generate an img for SD boot
 ```
 git clone https://github.com/friendlyarm/sd-fuse_s5pc110.git
