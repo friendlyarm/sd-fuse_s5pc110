@@ -66,7 +66,7 @@ if [ $# -eq 2 ]; then
 else
 	case ${TARGET_OS} in
 	friendlycore)
-		RAW_FILE=${SOC}-friendlycore-sdfuse-$(date +%Y%m%d).img
+		RAW_FILE=tinyc110-sdfuse_$(date +%Y%m%d).img
 		true ${RAW_SIZE_MB:=7800} ;;
 	*)
 		RAW_FILE=${SOC}-${TARGET_OS}-sdfuse-$(date +%Y%m%d).img
