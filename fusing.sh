@@ -71,7 +71,7 @@ fi
 # ----------------------------------------------------------
 # Get target OS
 
-true ${TARGET_OS:=${2,,}}
+true ${TARGET_OS:=$(echo ${2,,}|sed 's/\///g')}
 PARTMAP=./${TARGET_OS}/partmap.txt
 
 case ${TARGET_OS} in
@@ -119,12 +119,9 @@ if [ $(id -u) -ne 0 ]; then
 	exit
 fi
 
-# ----------------------------------------------------------
-# Get host machine
-ARCH=
-if grep 'ARMv7 Processor' /proc/cpuinfo >/dev/null; then
-#	EMMC=.emmc
-	ARCH=armv7/
+HOST_ARCH=
+if uname -mpi | grep aarch64 >/dev/null; then
+    HOST_ARCH="aarch64/"
 fi
 
 # ----------------------------------------------------------
@@ -152,7 +149,7 @@ echo ""
 # ----------------------------------------------------------
 # partition card & fusing filesystem
 
-true ${SD_UPDATE:=./tools/${ARCH}sd_update}
+true ${SD_UPDATE:=./tools/${HOST_ARCH}sd_update}
 true ${SD_TUNEFS:=./tools/sd_tune2fs.sh}
 
 [[ -z $2 && ! -f ${PARTMAP} ]] && {
@@ -178,14 +175,13 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-if [ -z ${ARCH} ]; then
-	partprobe /dev/${DEV_NAME} -s 2>/dev/null
+if ! command -v partprobe &>/dev/null; then
+	sudo apt-get install parted
 fi
+
+partprobe /dev/${DEV_NAME} -s 2>/dev/null
 if [ $? -ne 0 ]; then
 	echo "Warning: Re-reading the partition table failed"
 fi
-
 echo "---------------------------------"
-echo "${TARGET_OS^} is fused successfully."
 echo "All done."
-

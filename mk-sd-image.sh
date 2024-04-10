@@ -27,6 +27,16 @@ if [ $# -eq 0 ]; then
 	usage
 fi
 
+# Automatically re-run script under sudo if not root
+if [ $(id -u) -ne 0 ]; then
+	echo "Re-running script under sudo..."
+	sudo --preserve-env "$0" "$@"
+	exit
+fi
+
+. tools/util.sh
+check_and_install_package
+
 # ----------------------------------------------------------
 # Get platform, target OS
 
@@ -41,16 +51,6 @@ friendlycore*)
 	echo "Error: Unsupported target OS: ${TARGET_OS}"
 	exit 0
 esac
-
-
-# Automatically re-run script under sudo if not root
-if [ $(id -u) -ne 0 ]; then
-	echo "Re-running script under sudo..."
-	sudo --preserve-env "$0" "$@"
-	exit
-fi
-
-
 
 # ----------------------------------------------------------
 # Create zero file
@@ -80,18 +80,15 @@ if [ ! -d $OUT ]; then
 	exit 1
 fi
 RAW_FILE=${OUT}/${RAW_FILE}
+if [ -f "${RAW_FILE}" ]; then
+	rm -f ${RAW_FILE}
+fi
 
 BLOCK_SIZE=1024
 let RAW_SIZE=(${RAW_SIZE_MB}*1000*1000)/${BLOCK_SIZE}
 
 echo "Creating RAW image: ${RAW_FILE} (${RAW_SIZE_MB} MB)"
 echo "---------------------------------"
-
-
-if [ -f "${RAW_FILE}" ]; then
-	rm -f ${RAW_FILE}
-fi
-
 dd if=/dev/zero of=${RAW_FILE} bs=${BLOCK_SIZE} count=0 \
 	seek=${RAW_SIZE} || exit 1
 
@@ -108,8 +105,15 @@ fi
 # Setup loop device
 
 LOOP_DEVICE=$(losetup -f)
-
 echo "Using device: ${LOOP_DEVICE}"
+for i in `seq 3`; do
+    if [ -b ${LOOP_DEVICE} ]; then
+        break
+    else
+        echo "Waitting ${LOOP_DEVICE}"
+        sleep 1
+    fi
+done
 
 if losetup ${LOOP_DEVICE} ${RAW_FILE}; then
 	USE_KPARTX=1
@@ -123,7 +127,6 @@ fi
 
 # ----------------------------------------------------------
 # Fusing all
-
 true ${SD_FUSING:=$(dirname $0)/fusing.sh}
 
 ${SD_FUSING} ${LOOP_DEVICE} ${TARGET_OS}
@@ -141,7 +144,7 @@ function copy_prebuilt_boot() {
 }
 
 if [ -n ${BOOT_DIR} ]; then
-	mkfs.vfat ${LOOP_DEVICE}p1 -n FriendlyARM
+	sudo mkfs.vfat ${LOOP_DEVICE}p1 -n FriendlyARM
 	copy_prebuilt_boot ${BOOT_DIR}
 fi
 
@@ -158,4 +161,3 @@ echo "---------------------------------"
 echo "RAW image successfully created (`date +%T`)."
 ls -l ${RAW_FILE}
 echo "Tip: You can compress it to save disk space."
-

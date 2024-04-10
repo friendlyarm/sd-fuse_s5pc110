@@ -26,7 +26,7 @@ KERNEL_BRANCH=tinyc110-v3.0.8
 ARCH=arm
 true ${KCFG_ONENAND:=tinyc110_linux_defconfig}
 true ${KCFG_SD:=tinyc110-mmcboot_linux_defconfig}
-CROSS_COMPILER=arm-linux-
+CROSS_COMPILE=arm-linux-
 
 TOPPATH=$PWD
 OUT=$TOPPATH/out
@@ -34,7 +34,8 @@ if [ ! -d $OUT ]; then
 	echo "path not found: $OUT"
 	exit 1
 fi
-true ${KERNEL_SRC:=${OUT}/kernel-${SOC}}
+true ${kernel_src:=${OUT}/kernel-${SOC}}
+true ${KERNEL_SRC:=${kernel_src}}
 
 function usage() {
        echo "Usage: $0 <friendlycore>"
@@ -54,9 +55,16 @@ if [ $# -ne 1 ]; then
     usage
 fi
 
+. ${TOPPATH}/tools/util.sh
+check_and_install_toolchain
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+check_and_install_package
+
 # ----------------------------------------------------------
 # Get target OS
-true ${TARGET_OS:=${1,,}}
+true ${TARGET_OS:=$(echo ${1,,}|sed 's/\///g')}
 PARTMAP=./${TARGET_OS}/partmap.txt
 
 case ${TARGET_OS} in
@@ -101,15 +109,6 @@ download_img ${TARGET_OS}
 if [ ! -d ${KERNEL_SRC} ]; then
 	git clone ${KERNEL_REPO} --depth 1 -b ${KERNEL_BRANCH} ${KERNEL_SRC}
 fi
-
-if [ ! -d /opt/FriendlyARM/toolchain/4.5.1 ]; then
-	echo "please install arm-linux-gcc 4.5.1 first by running these commands: "
-	echo "\tgit clone https://github.com/friendlyarm/prebuilts.git --depth 1 -b master"
-	echo "\tsudo mkdir -p /opt/FriendlyARM/toolchain"
-	echo "\tsudo tar xf prebuilts/gcc/arm-linux-gcc-4.5.1-v6-vfp.tar.xz -C /opt/FriendlyARM/toolchain/ --strip-components 3"
-	exit 1
-fi
-export PATH=/opt/FriendlyARM/toolchain/4.5.1/bin/:$PATH
 
 cd ${KERNEL_SRC}
 make distclean

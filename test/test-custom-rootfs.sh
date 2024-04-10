@@ -4,10 +4,16 @@ set -eu
 HTTP_SERVER=112.124.9.243
 
 # hack for me
-PCNAME=`hostname`
-if [ x"${PCNAME}" = x"tzs-i7pc" ]; then
-       HTTP_SERVER=127.0.0.1
-fi
+[ -f /etc/friendlyarm ] && source /etc/friendlyarm $(basename $(builtin cd ..; pwd))
+
+case "$(uname -mpi)" in
+x86_64*)
+	;;
+*)
+	echo "Error: only supports x86_64."
+	exit 1
+	;;
+esac
 
 # clean
 mkdir -p tmp
