@@ -28,7 +28,7 @@ BOARD=S5PC110/images
 TARGET_OS=$(echo ${1,,}|sed 's/\///g')
 ROMFILE=`./tools/get_pkg_filename.sh ${TARGET_OS}`
 if [ -z ${ROMFILE} ]; then
-	echo "Usage: $0 <debian|friendlycore|friendlywrt|friendlyretro>"
+	echo "Usage: $0 <img dir>"
 	exit 1
 fi
 

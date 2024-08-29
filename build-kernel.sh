@@ -38,7 +38,7 @@ true ${kernel_src:=${OUT}/kernel-${SOC}}
 true ${KERNEL_SRC:=${kernel_src}}
 
 function usage() {
-       echo "Usage: $0 <friendlycore>"
+       echo "Usage: $0 <img dir>"
        echo "# example:"
        echo "# clone kernel source from github:"
        echo "    git clone ${KERNEL_REPO} --depth 1 -b ${KERNEL_BRANCH} ${KERNEL_SRC}"

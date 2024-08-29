@@ -2,7 +2,7 @@
 set -eu
 
 if [ $# -lt 2 ]; then
-	echo "Usage: $0 <rootfs dir> <img filename> "
+	echo "Usage: $0 <rootfs dir> <img filename>"
     echo "example:"
     echo "    tar xvzf NETDISK/S5PC110/rootfs/rootfs_qtopia_qt4.tgz"
     echo "    ./build-rootfs-img.sh rootfs_qtopia_qt4 friendlycore"
