@@ -6,7 +6,7 @@ Create bootable SD card for TinyC110, used to flash OS images onto onenand, or b
 ```
 git clone https://github.com/friendlyarm/sd-fuse_s5pc110.git
 cd sd-fuse_s5pc110
-wget http://112.124.9.243/dvdfiles/S5PC110/images/friendlycore-images.tgz
+wget https://downloads.friendlyelec.com/os-images/s5pc110/images/friendlycore-images.tgz
 tar xzf friendlycore-images.tgz
 sudo ./mk-sd-image.sh friendlycore
 ```
@@ -15,11 +15,13 @@ You will get an image file named tinyc110-sdfuse_YYYYMMDD.img (located in the ou
 ```
 git clone https://github.com/friendlyarm/sd-fuse_s5pc110.git
 cd sd-fuse_s5pc110
-wget http://112.124.9.243/dvdfiles/S5PC110/images/friendlycore-images.tgz
+wget https://downloads.friendlyelec.com/os-images/s5pc110/images/friendlycore-images.tgz
 tar xzf friendlycore-images.tgz
 
 # download rootfs package
-wget http://112.124.9.243/dvdfiles/S5PC110/rootfs/rootfs_qtopia_qt4.tgz
+wget https://downloads.friendlyelec.com/rootfs/s5pc110/rootfs_qtopia_qt4.tgz
+wget https://downloads.friendlyelec.com/rootfs/s5pc110/rootfs_qtopia_qt4.tgz.sha256
+sha256sum -c rootfs_qtopia_qt4.tgz.sha256
 sudo rm -rf rootfs_qtopia_qt4
 sudo tar xzf rootfs_qtopia_qt4.tgz
 [ -c rootfs_qtopia_qt4/dev/console ] || sudo mknod rootfs_qtopia_qt4/dev/console c 5 1
@@ -40,7 +42,7 @@ You will get an image file named tinyc110-sdfuse_YYYYMMDD.img (located in the ou
 ```
 git clone https://github.com/friendlyarm/sd-fuse_s5pc110.git
 cd sd-fuse_s5pc110
-wget http://112.124.9.243/dvdfiles/S5PC110/images/friendlycore-images.tgz
+wget https://downloads.friendlyelec.com/os-images/s5pc110/images/friendlycore-images.tgz
 tar xzf friendlycore-images.tgz
 
 ./build-kernel.sh friendlycore
@@ -54,7 +56,7 @@ build-kernel.sh and build-uboot.sh will clone the source code from github.
 ```
 git clone https://github.com/friendlyarm/sd-fuse_s5pc110.git
 cd sd-fuse_s5pc110
-wget http://112.124.9.243/dvdfiles/S5PC110/images/friendlycore-images.tgz
+wget https://downloads.friendlyelec.com/os-images/s5pc110/images/friendlycore-images.tgz
 tar xzf friendlycore-images.tgz
 
 sed -i 's/^Action/#Action/g' friendlycore/boot/images/FriendlyARM.ini

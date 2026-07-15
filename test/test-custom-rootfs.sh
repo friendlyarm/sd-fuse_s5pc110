@@ -1,8 +1,13 @@
 #!/bin/bash
 set -eu
 
-HTTP_SERVER=112.124.9.243
-
+if [ -f "$(dirname "$(readlink -f "$0")")/../.use-local-r2" ]; then
+    CDN_URL=http://cdn.local/friendlyelec-cdn/os-images/s5pc110/images
+    ROOTFS_URL=http://cdn.local/friendlyelec-cdn/rootfs/s5pc110
+else
+    CDN_URL=https://downloads.friendlyelec.com/os-images/s5pc110/images
+    ROOTFS_URL=https://downloads.friendlyelec.com/rootfs/s5pc110
+fi
 # hack for me
 [ -f /etc/friendlyarm ] && source /etc/friendlyarm $(basename $(builtin cd ..; pwd))
 
@@ -22,7 +27,7 @@ sudo rm -rf tmp/*
 cd tmp
 git clone ../../.git sd-fuse_s5pc110
 cd sd-fuse_s5pc110
-wget --no-proxy http://${HTTP_SERVER}/dvdfiles/S5PC110/images/friendlycore-images.tgz
+wget ${CDN_URL}/friendlycore-images.tgz
 tar xzf friendlycore-images.tgz
 
 # re-build kernel
@@ -32,7 +37,9 @@ tar xzf friendlycore-images.tgz
 ./build-uboot.sh friendlycore
 
 # download rootfs package
-wget --no-proxy http://${HTTP_SERVER}/dvdfiles/S5PC110/rootfs/rootfs_qtopia_qt4.tgz
+wget ${ROOTFS_URL}/rootfs_qtopia_qt4.tgz
+wget ${ROOTFS_URL}/rootfs_qtopia_qt4.tgz.sha256
+sha256sum -c rootfs_qtopia_qt4.tgz.sha256
 sudo rm -rf rootfs_qtopia_qt4
 sudo tar xzf rootfs_qtopia_qt4.tgz
 [ -c rootfs_qtopia_qt4/dev/console ] || sudo mknod rootfs_qtopia_qt4/dev/console c 5 1
